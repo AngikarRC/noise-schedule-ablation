@@ -1,0 +1,27 @@
+# Install torch FIRST, separately, with a CUDA 12.8+ build:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+# Stock CPU/cu12.1 wheels will install cleanly and then fail at runtime on the
+# RTX 5050 with "no kernel image is available for execution on the device".
+#
+# Do NOT install xformers. It can pull a torch build without sm_120 support.
+
+diffusers==0.31.0
+transformers==4.46.3
+accelerate==1.1.1
+peft==0.13.2
+safetensors==0.4.5
+
+# Not installed on purpose:
+#   datasets      - we load LLVIP from files; it drags in pyarrow, which
+#                   requires numpy >= 2 and conflicts with the pin below
+#   bitsandbytes  - the Windows wheel ships without a CUDA binary, and with
+#                   LoRA the optimizer states are small enough not to matter
+#   xformers      - can silently downgrade torch below sm_120 support
+
+numpy==1.26.4
+Pillow==10.4.0
+scikit-image==0.24.0
+pandas==2.2.3
+matplotlib==3.9.2
+PyYAML==6.0.2
+tqdm==4.67.0

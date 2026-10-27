@@ -1,0 +1,34 @@
+# Dataset. LLVIP is ~15,000 image pairs and is not ours to redistribute.
+# Fetch it from https://bupt-ai-cz.github.io/LLVIP/ and run prepare_llvip.py;
+# the manifests under data/ pin exactly which pairs were used.
+LLVIP/
+data/cache/
+
+# Run products: generated images, checkpoints, trajectories, metrics.
+# All reproducible from the commands in the README.
+outputs/
+trajectories/
+report/figures/
+report/metrics.*
+report/per_image_*.csv
+report/code_diff.txt
+logs/*_loss.csv
+
+# Tracked on purpose, despite sitting in generated directories:
+#   data/*.txt            the split - without it the runs are not reproducible
+#   data/split_summary.json
+#   schedules/            the alpha_bar arrays and checksums for both runs,
+#                         which are the evidence that Run B used the powered
+#                         schedule and Run A did not
+#   logs/env.json         the machine and library versions results came from
+#
+# For the report submission, force-add the figures you need:
+#   git add -f report/figures/fig1_schedule.png
+
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
