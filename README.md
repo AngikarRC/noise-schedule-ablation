@@ -77,7 +77,9 @@ The --fetch flag downloads the baseline in Python rather than shelling out to cu
 
 For the report, produce the side-by-side diff with:
 
-    diff -u baseline\train_instruct_pix2pix_ORIGINAL.py scripts\finetune.py > report\code_diff.txt
+    python scripts\make_diff.py
+
+This is a script and not a shell command on purpose. On PowerShell, diff is an alias for Compare-Object and rejects the -u flag, in the same way that curl is an alias for Invoke-WebRequest. Writing it in Python means the same line works on every machine.
 
 ### Train Run A
 

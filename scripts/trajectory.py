@@ -18,11 +18,27 @@ from schedule import POWER_EXPONENT, schedule_checksum
 
 
 def decode(pipe, latents):
-    with torch.no_grad():
-        image = pipe.vae.decode(latents / pipe.vae.config.scaling_factor).sample
+    # At the first timestep Run B's x_t is a few hundred times larger than
+    # anything the VAE was trained on, which overflows it and writes a black
+    # frame, so I divide by its own spread before decoding and record that
+    # divisor next to the image.
+    z = torch.nan_to_num(latents.float(), nan=0.0, posinf=0.0, neginf=0.0)
+    scale = float(z.std().item())
+    if scale > 1.5:
+        z = z / scale
+    else:
+        scale = 1.0
+    was = next(pipe.vae.parameters()).dtype
+    try:
+        pipe.vae.float()
+        with torch.no_grad():
+            image = pipe.vae.decode(z / pipe.vae.config.scaling_factor).sample
+    finally:
+        pipe.vae.to(was)
+    image = torch.nan_to_num(image, nan=0.0, posinf=1.0, neginf=-1.0)
     image = (image / 2 + 0.5).clamp(0, 1)
     arr = (image[0].permute(1, 2, 0).float().cpu().numpy() * 255).astype("uint8")
-    return Image.fromarray(arr)
+    return Image.fromarray(arr), scale
 
 
 def main():
@@ -82,12 +98,13 @@ def main():
                 print(f"  warning: step {step} not captured for {name}")
                 continue
             t_value, latents = captured[step]
-            img = decode(pipe, latents[:1])
+            img, display_scale = decode(pipe, latents[:1])
             fname = f"run{args.run_mode}_{stem}_step{step:02d}_t{t_value:04d}.png"
             img.save(out_dir / fname)
             manifest.append({
                 "run": args.run_mode, "sample": name,
                 "sampler_step": step, "timestep": t_value, "file": fname,
+                "display_scale": round(display_scale, 2),
             })
 
         print(f"  {s+1}/{len(items)}  {name}")

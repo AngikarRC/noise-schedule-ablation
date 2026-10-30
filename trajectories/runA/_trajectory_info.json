@@ -17,105 +17,120 @@
       "sample": "190001.jpg",
       "sampler_step": 0,
       "timestep": 999,
-      "file": "runA_190001_step00_t0999.png"
+      "file": "runA_190001_step00_t0999.png",
+      "display_scale": 12.91
     },
     {
       "run": "A",
       "sample": "190001.jpg",
       "sampler_step": 12,
       "timestep": 754,
-      "file": "runA_190001_step12_t0754.png"
+      "file": "runA_190001_step12_t0754.png",
+      "display_scale": 4.25
     },
     {
       "run": "A",
       "sample": "190001.jpg",
       "sampler_step": 24,
       "timestep": 509,
-      "file": "runA_190001_step24_t0509.png"
+      "file": "runA_190001_step24_t0509.png",
+      "display_scale": 2.28
     },
     {
       "run": "A",
       "sample": "190001.jpg",
       "sampler_step": 37,
       "timestep": 244,
-      "file": "runA_190001_step37_t0244.png"
+      "file": "runA_190001_step37_t0244.png",
+      "display_scale": 1.61
     },
     {
       "run": "A",
       "sample": "190001.jpg",
       "sampler_step": 49,
       "timestep": 0,
-      "file": "runA_190001_step49_t0000.png"
+      "file": "runA_190001_step49_t0000.png",
+      "display_scale": 1.0
     },
     {
       "run": "A",
       "sample": "190034.jpg",
       "sampler_step": 0,
       "timestep": 999,
-      "file": "runA_190034_step00_t0999.png"
+      "file": "runA_190034_step00_t0999.png",
+      "display_scale": 12.83
     },
     {
       "run": "A",
       "sample": "190034.jpg",
       "sampler_step": 12,
       "timestep": 754,
-      "file": "runA_190034_step12_t0754.png"
+      "file": "runA_190034_step12_t0754.png",
+      "display_scale": 4.3
     },
     {
       "run": "A",
       "sample": "190034.jpg",
       "sampler_step": 24,
       "timestep": 509,
-      "file": "runA_190034_step24_t0509.png"
+      "file": "runA_190034_step24_t0509.png",
+      "display_scale": 2.27
     },
     {
       "run": "A",
       "sample": "190034.jpg",
       "sampler_step": 37,
       "timestep": 244,
-      "file": "runA_190034_step37_t0244.png"
+      "file": "runA_190034_step37_t0244.png",
+      "display_scale": 1.57
     },
     {
       "run": "A",
       "sample": "190034.jpg",
       "sampler_step": 49,
       "timestep": 0,
-      "file": "runA_190034_step49_t0000.png"
+      "file": "runA_190034_step49_t0000.png",
+      "display_scale": 1.0
     },
     {
       "run": "A",
       "sample": "190067.jpg",
       "sampler_step": 0,
       "timestep": 999,
-      "file": "runA_190067_step00_t0999.png"
+      "file": "runA_190067_step00_t0999.png",
+      "display_scale": 12.97
     },
     {
       "run": "A",
       "sample": "190067.jpg",
       "sampler_step": 12,
       "timestep": 754,
-      "file": "runA_190067_step12_t0754.png"
+      "file": "runA_190067_step12_t0754.png",
+      "display_scale": 4.28
     },
     {
       "run": "A",
       "sample": "190067.jpg",
       "sampler_step": 24,
       "timestep": 509,
-      "file": "runA_190067_step24_t0509.png"
+      "file": "runA_190067_step24_t0509.png",
+      "display_scale": 2.27
     },
     {
       "run": "A",
       "sample": "190067.jpg",
       "sampler_step": 37,
       "timestep": 244,
-      "file": "runA_190067_step37_t0244.png"
+      "file": "runA_190067_step37_t0244.png",
+      "display_scale": 1.61
     },
     {
       "run": "A",
       "sample": "190067.jpg",
       "sampler_step": 49,
       "timestep": 0,
-      "file": "runA_190067_step49_t0000.png"
+      "file": "runA_190067_step49_t0000.png",
+      "display_scale": 1.0
     }
   ]
 }

@@ -81,6 +81,9 @@ def build_stages():
         ("patch", "Fetch the pinned baseline and generate finetune.py",
          [[PY, "scripts/make_finetune.py", "--fetch"]], "scripts/finetune.py"),
 
+        ("diff", "Write the baseline-to-finetune diff for the report",
+         [[PY, "scripts/make_diff.py"]], "report/code_diff.txt"),
+
         ("train-a", f"Run A - native schedule ({EPOCHS} epochs, {STEPS} steps)",
          [train_command("A")], f"outputs/runA/checkpoint-{STEPS}"),
 

@@ -1,0 +1,262 @@
+SUBMISSION CHECKPOINT
+Group 38 - Noise Schedule Ablation in Diffusion Models
+Foundation Models and Generative AI, Phase 2
+
+This file is for us, not for the grader. It lists every file we are handing in,
+says which part of the assignment asks for it, and says which section of the
+report uses it. Tick each line before zipping the folder.
+
+Paths are relative to the project root.
+
+
+=====================================================================
+PART 1 OF 4 - CODE
+assignment: "the modified codebase with every changed line marked"
+=====================================================================
+
+[ ] scripts/finetune.py
+    the only file derived from upstream code
+    104 lines marked # ADDED, 12 marked # MODIFIED
+    -> report section 5.1 (the counts), 5.2 (four of the changes shown)
+
+[ ] baseline/train_instruct_pix2pix_ORIGINAL.py
+    the untouched Hugging Face example at diffusers tag v0.31.0
+    hand this in too, otherwise the diff cannot be checked
+    -> report section 5.1, 5.2 (the left-hand column of every comparison)
+
+[ ] report/code_diff.txt
+    full line-by-line diff, 309 changed lines
+    REGENERATE BEFORE SUBMITTING, it is in .gitignore:
+      python scripts\make_diff.py
+    do NOT use "diff -u" on PowerShell, diff is an alias for Compare-Object
+    -> report section 5.1 (table), 5.2 (the eight changes not shown inline)
+
+[ ] scripts/make_diff.py
+    writes the above. also wired into main.py as the "diff" stage.
+    -> report appendix A.1
+
+[ ] scripts/make_finetune.py
+    generates finetune.py from the baseline by 15 anchored patches
+    -> report section 5.1
+
+[ ] scripts/schedule.py
+    the power transform, the bounds check, the checksums
+    POWER_EXPONENT = 2.35 is declared on line 15
+    -> report section 5.1 (the named constant requirement), 3.1, 3.2
+
+[ ] scripts/prepare_llvip.py      -> report section 4.1, 4.2
+[ ] scripts/llvip_data.py         -> report section 4.1
+[ ] scripts/infer.py              -> report section 6.1, 6.3, 6.5
+[ ] scripts/trajectory.py         -> report section 6.4
+[ ] scripts/evaluate.py           -> report section 6.5
+[ ] scripts/epoch_losses.py       -> report section 6.2
+[ ] scripts/check_env.py          -> report appendix A.6
+[ ] main.py                       -> report section 5.3 (the command guard)
+
+[ ] README.md
+    assignment asks for: exact commands for Run 0, A and B, the seed,
+    and the software environment. All three are in there.
+    -> report appendix A.6 repeats the environment table
+
+[ ] requirements.txt
+    -> report appendix A.6
+
+[ ] .gitignore
+    not required, include it so the grader knows why LLVIP is absent
+
+
+=====================================================================
+PART 2 OF 4 - FINE-TUNING LOGS
+assignment: "one CSV per run with columns epoch, train_loss" and
+            "at 5 equally spaced epochs, at least 3 samples per checkpoint"
+=====================================================================
+
+THE TWO REQUIRED CSVs
+
+[ ] logs/runA_epoch_loss.csv
+    5 rows, columns exactly: epoch, train_loss
+    0.157666 / 0.150342 / 0.148050 / 0.141024 / 0.134128
+    -> report section 6.2, Table 3
+
+[ ] logs/runB_epoch_loss.csv
+    5 rows, same columns
+    0.093796 / 0.088471 / 0.086850 / 0.082589 / 0.078033
+    -> report section 6.2, Table 3
+
+SUPPORTING (not required, include anyway)
+
+[ ] logs/runA_loss.csv, logs/runB_loss.csv
+    per-step loss, 2500 rows each
+    -> report section 6.2, left panel of Figure 3
+
+[ ] logs/env.json
+    Python 3.12.10, torch 2.11.0+cu128, diffusers 0.31.0, RTX 5050 sm_120
+    -> report appendix A.6
+
+THE CHECKPOINT SAMPLES
+requirement is 5 checkpoints x at least 3 samples x both runs.
+we have 5 x 4 x 2 = 40 images. the 4 validation images are the same
+at every checkpoint and the seed is the same, on purpose.
+
+[ ] outputs/runA/ckpt-500/    epoch 1
+[ ] outputs/runA/ckpt-1000/   epoch 2
+[ ] outputs/runA/ckpt-1500/   epoch 3
+[ ] outputs/runA/ckpt-2000/   epoch 4
+[ ] outputs/runA/ckpt-2500/   epoch 5
+    -> report section 6.3, Figure 4
+
+[ ] outputs/runB/ckpt-500/    epoch 1
+[ ] outputs/runB/ckpt-1000/   epoch 2
+[ ] outputs/runB/ckpt-1500/   epoch 3
+[ ] outputs/runB/ckpt-2000/   epoch 4
+[ ] outputs/runB/ckpt-2500/   epoch 5
+    -> report section 6.3, Figure 5
+    -> report section 7.2 cites epoch 3 as where the two runs diverge
+
+note on labelling: the folder name carries the run and the step, and
+2500 steps / 500 per epoch means ckpt-500 is epoch 1 and so on. if the
+grader wants the epoch in the filename rather than the path, rename
+before zipping.
+
+
+=====================================================================
+PART 3 OF 4 - INFERENCE TRAJECTORIES
+assignment: "x_t at 5 equally spaced timesteps, at least 3 samples
+             per timestep, labelled with run name and timestep index"
+=====================================================================
+
+[ ] trajectories/runA/   15 png, 3 samples x 5 timesteps
+[ ] trajectories/runB/   15 png, 3 samples x 5 timesteps
+    filenames already carry everything: runA_190001_step00_t0999.png
+    sampler steps 0, 12, 24, 37, 49 of 50
+    diffusion timesteps 999, 754, 509, 244, 0
+    -> report section 6.4, Figure 6
+
+[ ] trajectories/runA/_trajectory_info.json
+[ ] trajectories/runB/_trajectory_info.json
+    maps every file to its timestep, carries the schedule checksum
+    and the display_scale divisor
+    -> report section 6.4 (the 550x rescaling paragraph)
+
+BEFORE SUBMITTING, CHECK THIS:
+    the three Run B step00 frames must not be black.
+    if they are, the fix has not been run. run:
+      python main.py --only traj-a traj-b --force
+      python scripts\make_traj_figure.py
+
+
+=====================================================================
+PART 4 OF 4 - REPORT
+=====================================================================
+
+[ ] Group38_Phase2_Report.docx  (and a PDF of it)
+
+SECTION BY SECTION, WHAT EACH ONE LEANS ON
+
+1. Task and Model
+   nothing generated, this is description
+   numbers quoted: 862,721,220 UNet parameters, 8 conv_in channels
+   source: logs/env.json and the model card
+
+2. Dataset and Verification
+   data/split_summary.json          counts and scenes
+   citation: arXiv 2211.09800 section 3.1.1 page 3
+
+3. Schedule Analysis
+   [ ] report/figures/fig1_schedule.png        -> Figure 1
+   [ ] schedules/schedule_runA.csv             -> Table 1 and 2, Run A column
+   [ ] schedules/schedule_runB.csv             -> Table 1 and 2, Run B column
+   [ ] schedules/checksums.txt                 -> the two expected checksums
+   key claims and where they come from:
+     alpha-bar in (0,1): min/max rows of both CSVs
+     half-signal point 355 vs 207: printed by scripts/schedule.py
+     log-SNR ratio 2.35 at t=1000: last row of Table 2
+
+4. Experimental Setup
+   [ ] data/train.txt, data/val.txt, data/test.txt    the split itself
+   [ ] data/split_summary.json                        2000 / 60 / 100, the scenes
+   the hyperparameter table is the two training commands in README.md
+   the 15.22 vs 17.78-46.87 frame-similarity numbers were measured once
+   during the split design, they are quoted in the report only
+
+5. Implementation
+   [ ] baseline/train_instruct_pix2pix_ORIGINAL.py    left column
+   [ ] scripts/finetune.py                            right column
+   [ ] report/code_diff.txt                           the other eight changes
+   [ ] schedules/checksums.txt                        section 5.3 evidence
+   the six matching checksums are in the console log of the full run.
+   KEEP THAT CONSOLE LOG. paste it into a text file if it is still in
+   the terminal scrollback, it is the cleanest proof we have.
+
+6. Results
+   6.1 [ ] outputs/run0/                       -> Figure 2
+       [ ] report/figures/fig3_run0_samples.png
+   6.2 [ ] logs/run*_epoch_loss.csv            -> Table 3
+       [ ] report/figures/fig2_loss_curves.png -> Figure 3
+   6.3 [ ] outputs/run*/ckpt-*/                -> Figures 4 and 5
+       [ ] report/figures/fig4_checkpoints_runA.png
+       [ ] report/figures/fig4_checkpoints_runB.png
+   6.4 [ ] trajectories/run*/                  -> Figure 6
+       [ ] report/figures/fig6_trajectories.png
+   6.5 [ ] report/metrics.csv                  -> Table 4
+       [ ] outputs/runA/final/, outputs/runB/final/   the images scored
+   6.6 [ ] report/figures/fig_results_grid.png -> Figure 7
+
+7. Analysis
+   [ ] report/per_image_run0.csv
+   [ ] report/per_image_runa.csv
+   [ ] report/per_image_runb.csv
+       these back the control in Table 5. the control row itself
+       (visible input vs thermal, SSIM 0.2591) was computed separately.
+       IF ASKED FOR IT, re-run:
+         python scripts\evaluate.py --runA outputs\runA\final --runB outputs\runB\final
+   claims and their evidence:
+     "Run B better by eye"            Figure 7, Figure 5
+     "Run A better on SSIM"           Table 4
+     "diverge at epoch 3"             Figures 4 and 5, column 3
+     "losses not comparable"          section 3.4, the SNR argument
+     "7 percent signal left at t=T"   Table 1, sqrt(alpha-bar) column
+     "Run 0 is +0.0012 over nothing"  Table 5
+
+8. Takeaway
+   nothing generated
+
+9. Contribution Statement
+   FILL IN FOUR NAMES AND ROLL NUMBERS. SIGN IT.
+   the table is in the docx with the components already split four ways.
+
+
+=====================================================================
+THINGS THAT ARE NOT GOING IN, AND WHY
+=====================================================================
+
+LLVIP/                      the dataset. not ours to redistribute, and the
+                            licence is non-commercial research only. the
+                            manifests plus the source URL let anyone rebuild it.
+
+data/cache/                 2160 resized jpegs, rebuilds in a few minutes
+                            from the manifests.
+
+outputs/*/checkpoint-*/     the five intermediate LoRA adapters per run,
+                            12.8 MB each. the images they produced are in,
+                            which is what the assignment asked for.
+
+.venv/                      obviously
+
+outputs/runA/pytorch_lora_weights.safetensors   KEEP THIS ONE
+outputs/runB/pytorch_lora_weights.safetensors   AND THIS ONE
+                            13 MB each, these are the final trained models.
+                            without them nothing is reproducible.
+
+
+=====================================================================
+FINAL CHECKS BEFORE ZIPPING
+=====================================================================
+
+[ ] report/code_diff.txt regenerated  ->  python scripts\make_diff.py
+[ ] no black frames in trajectories/runB/
+[ ] four names and signatures in section 9 of the report
+[ ] report exported to PDF as well as docx
+[ ] console log of the full run saved somewhere, for the checksums
+[ ] folder opens cleanly on a machine that is not Angikar's
+    (paths in README use backslashes, that is fine for Windows graders)
