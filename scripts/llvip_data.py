@@ -1,17 +1,7 @@
-"""LLVIP paired dataset for the InstructPix2Pix training loop.
-
-Task direction, as declared in Phase 1: visible-light image in, infrared image
-out. In the training script's vocabulary that means
-
-    original_pixel_values  <- visible   (the conditioning image)
-    edited_pixel_values    <- infrared  (the target the model learns to produce)
-
-Images come from the 256x256 cache written by prepare_llvip.py, so there is no
-decode of 1280x1024 JPEGs on the hot path and no resizing inside the loop.
-
-Augmentation is off by default. Run A and Run B must see identical data in an
-identical order; a random flip is one more thing that could desynchronise them
-for no benefit on a 600-image fine-tune.
+"""Feeds LLVIP image pairs to the training loop.
+I have mapped the visible image onto original_pixel_values and the infrared image
+onto edited_pixel_values, which are InstructPix2Pix's names for the conditioning
+image and the target. Augmentation is off so both runs see identical data.
 """
 
 from pathlib import Path
@@ -25,7 +15,6 @@ PROMPT = "turn this visible-light photo into an infrared thermal image"
 
 
 def _to_tensor(img):
-    """PIL image -> float tensor in [-1, 1], shape (3, H, W)."""
     arr = np.array(img.convert("RGB"), dtype=np.float32)
     arr = 2.0 * (arr / 255.0) - 1.0
     return torch.from_numpy(arr).permute(2, 0, 1).contiguous()
@@ -103,7 +92,6 @@ def collate_fn(examples):
 
 
 def load_fixed_batch(data_root, resolution=256):
-    """The same validation images at every checkpoint, in both runs."""
     root = Path(data_root)
     rels = [line.strip() for line in (root / "val_fixed.txt").read_text().splitlines()
             if line.strip()]

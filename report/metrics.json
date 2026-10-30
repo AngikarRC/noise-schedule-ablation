@@ -1,0 +1,32 @@
+{
+  "Run 0": {
+    "n": 100,
+    "ssim_mean": 0.2954329385327791,
+    "ssim_std": 0.12290397784746332,
+    "psnr_mean": 11.857104465683848,
+    "psnr_std": 1.4864773849385553,
+    "luminance_mean_error": -11.605474662780761,
+    "luminance_mean_abs_error": 21.83043056488037,
+    "contrast_ratio": 0.9047345754004513
+  },
+  "Run A": {
+    "n": 100,
+    "ssim_mean": 0.2829302233017076,
+    "ssim_std": 0.06345662896011063,
+    "psnr_mean": 8.44902372011657,
+    "psnr_std": 0.9834036366691751,
+    "luminance_mean_error": 11.166604919433594,
+    "luminance_mean_abs_error": 33.431896743774416,
+    "contrast_ratio": 1.6231611461378008
+  },
+  "Run B": {
+    "n": 100,
+    "ssim_mean": 0.2578670531813574,
+    "ssim_std": 0.06192631186783407,
+    "psnr_mean": 9.12575531373721,
+    "psnr_std": 0.9069758028027313,
+    "luminance_mean_error": -24.99109775543213,
+    "luminance_mean_abs_error": 26.02956745147705,
+    "contrast_ratio": 1.3568355469411477
+  }
+}

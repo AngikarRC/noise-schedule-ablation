@@ -1,16 +1,7 @@
-"""Generate infrared predictions from visible inputs.
-
-Covers all three conditions:
-
-    Run 0   no LoRA weights, native schedule  (out-of-distribution baseline)
-    Run A   LoRA from run A, native schedule
-    Run B   LoRA from run B, powered schedule
-
-The schedule wiring matters more than it looks. A model fine-tuned under the
-powered schedule and then sampled under the native one produces garbage, and
-the failure looks exactly like "the modified schedule is bad". So --run_mode
-drives both the weights and the sampler, and the schedule checksum is printed
-on every call so the report can show training and inference agreed.
+"""Generates images for Run 0, Run A and Run B.
+I have made run_mode drive both the weights and the sampler's schedule, because
+sampling a model under a different schedule than it trained on produces garbage
+that looks exactly like the modified schedule being at fault.
 """
 
 import argparse
@@ -92,7 +83,6 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for i, (name, path) in enumerate(items):
-        # Reseed per image so results do not depend on position in the list.
         generator = torch.Generator(device=pipe.device).manual_seed(args.seed + i)
         source = Image.open(path).convert("RGB")
         result = pipe(
@@ -123,7 +113,6 @@ def main():
     }, indent=2))
 
     print(f"wrote {len(items)} images to {out_dir}")
-
 
 if __name__ == "__main__":
     main()

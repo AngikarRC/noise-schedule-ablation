@@ -1,15 +1,7 @@
-"""Noise schedule transform for the Run A / Run B ablation.
-
-Declared parameterisation: theta_t = alpha_bar_t (cumulative signal retention).
-Run A uses the native schedule. Run B uses alpha_bar_t ** POWER_EXPONENT.
-
-Powering the cumulative term elementwise is equivalent to powering every
-per-step alpha_s, since (prod alpha_s)^x = prod (alpha_s^x). That identity is
-why alpha_bar is the defensible choice here: the result is a genuine
-reparameterisation of the forward process, not an arbitrary edit.
-
-Run this file directly to produce the verification output and the schedule
-plot required by the report.
+"""Implements the power transform on the noise schedule and proves it is correct.
+I have declared theta as alpha_bar because that is the quantity training actually
+reads, and because raising it to a power is the same as raising every per-step
+alpha, which makes it a reparameterisation rather than an arbitrary edit.
 """
 
 import argparse
@@ -30,13 +22,6 @@ def _as_numpy(x):
 
 
 def transformed_alphas_cumprod(alphas_cumprod, exponent):
-    """Return alpha_bar ** exponent, with the dependent coefficients.
-
-    Rebuilding alphas and betas from the powered alpha_bar keeps the whole
-    scheduler self-consistent. Overriding alphas_cumprod alone would leave
-    scheduler.betas disagreeing with it, which silently breaks any sampler
-    that reads betas instead.
-    """
     abar = _as_numpy(alphas_cumprod)
     abar_x = abar ** float(exponent)
 
@@ -49,7 +34,6 @@ def transformed_alphas_cumprod(alphas_cumprod, exponent):
 
 
 def apply_power_transform(scheduler, exponent=POWER_EXPONENT):
-    """Rewrite a diffusers scheduler in place to use the powered schedule."""
     if exponent == 1.0:
         return scheduler
 
@@ -68,7 +52,6 @@ def apply_power_transform(scheduler, exponent=POWER_EXPONENT):
     scheduler.alphas = torch.tensor(alphas, dtype=dtype, device=device)
     scheduler.betas = torch.tensor(betas, dtype=dtype, device=device)
 
-    # DDIM and friends cache this at construction; it must follow the override.
     if hasattr(scheduler, "final_alpha_cumprod"):
         set_to_one = getattr(scheduler.config, "set_alpha_to_one", True)
         value = 1.0 if set_to_one else abar_x[0]
@@ -78,11 +61,6 @@ def apply_power_transform(scheduler, exponent=POWER_EXPONENT):
 
 
 def schedule_checksum(scheduler):
-    """SHA-256 of the alpha_bar array, as the identity of the schedule in use.
-
-    Logged by every run so the report can prove Run B used the powered values
-    and Run A did not, at both training and inference time.
-    """
     abar = _as_numpy(scheduler.alphas_cumprod)
     return hashlib.sha256(abar.tobytes()).hexdigest()[:16]
 
@@ -109,7 +87,6 @@ def schedule_stats(scheduler):
 
 
 def verify_bounds(scheduler, label):
-    """Phase 1 item 5: confirm 0 < theta_t < 1 for every t."""
     abar = _as_numpy(scheduler.alphas_cumprod)
     ok_low = bool((abar > 0.0).all())
     ok_high = bool((abar < 1.0).all())
@@ -120,7 +97,6 @@ def verify_bounds(scheduler, label):
 
 
 def load_scheduler(run_mode, model_id=MODEL_ID, subfolder="scheduler"):
-    """Build the training scheduler for a run. 'A' native, 'B' powered."""
     from diffusers import DDPMScheduler
 
     scheduler = DDPMScheduler.from_pretrained(model_id, subfolder=subfolder)
@@ -132,7 +108,6 @@ def load_scheduler(run_mode, model_id=MODEL_ID, subfolder="scheduler"):
 
 
 def log_schedule(scheduler, run_mode, out_dir):
-    """Dump the full array, the checksum and the summary for one run."""
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -244,7 +219,6 @@ def main():
 
     print("\nVerification passed. Paste the table above into the report's "
           "Schedule Analysis section.")
-
 
 if __name__ == "__main__":
     main()

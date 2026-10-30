@@ -1,20 +1,7 @@
-"""Build scene-disjoint splits from LLVIP and cache resized image pairs.
-
-Two properties of LLVIP drive the design here:
-
-1. The images are video frames. The first two digits of a filename are a scene
-   id, and frames within one scene are highly correlated - sampling across a
-   500-frame gap inside one scene gives a smaller pixel difference than two
-   frames from different scenes. A random split would put near-duplicates on
-   both sides and inflate test SSIM. So every split boundary falls on a scene
-   boundary, and frames are taken with a stride inside each scene.
-
-2. LLVIP already separates scenes between its train and test folders
-   (01-18 and 25 in train; 19-24 and 26 in test). We keep that, carve a
-   validation set out of held-out train scenes, and use their test folder
-   as our test set.
-
-Outputs land in data/ and are read identically by Run A and Run B.
+"""Builds the train/val/test splits and a 512px cache from the raw LLVIP folders.
+I have split on scene boundaries rather than randomly, because LLVIP images are
+video frames and two frames from one scene are far more alike than two frames
+from different scenes, which would leak near-duplicates into the test set.
 """
 
 import argparse
@@ -43,7 +30,6 @@ def index_scenes(split_dir):
 
 
 def sample_with_stride(names, quota):
-    """Take `quota` names spread evenly across the scene, not clustered."""
     if quota >= len(names):
         return list(names)
     step = len(names) / quota
@@ -51,7 +37,6 @@ def sample_with_stride(names, quota):
 
 
 def allocate(scenes, total):
-    """Split a total across scenes proportionally, at least one each."""
     sizes = {s: len(n) for s, n in scenes.items()}
     pool = sum(sizes.values())
     quotas = {s: max(1, round(total * n / pool)) for s, n in sizes.items()}
@@ -125,12 +110,6 @@ def build_split(scenes, total, source_dirs, cache_root, split_name, resolution, 
 
 
 def resize_square(img, resolution):
-    """Centre crop to square, then resize. Keeps aspect ratio undistorted.
-
-    LLVIP frames are 1280x1024, so this crops to 1024x1024 and scales down.
-    Cropping before resizing keeps the visible and infrared views registered -
-    they are the same crop of the same scene.
-    """
     w, h = img.size
     side = min(w, h)
     left, top = (w - side) // 2, (h - side) // 2
@@ -203,7 +182,6 @@ def main():
     write_manifest(args.out / "val.txt", val)
     write_manifest(args.out / "test.txt", test)
 
-    # Same images, same order, generated at every checkpoint in both runs.
     fixed = sample_with_stride([r["name"] for r in val], args.fixed_batch)
     (args.out / "val_fixed.txt").write_text(
         "\n".join(f"val/{n}" for n in fixed) + "\n"
@@ -228,9 +206,6 @@ def main():
     assert not overlap, f"scene leaked across splits: {overlap}"
     print("no scene appears in more than one split")
 
-    # Re-running at a different resolution leaves the previous cache in place.
-    # Every file a manifest points at must be at the current resolution, or
-    # training silently mixes sizes.
     bad = []
     for records in (train, val, test):
         for rec in records:
@@ -256,7 +231,6 @@ def main():
               f"referenced by any manifest and will be ignored, e.g. {stale[:2]}")
 
     print(f"\nwrote manifests and {res}x{res} cache under {args.out}")
-
 
 if __name__ == "__main__":
     main()

@@ -1,11 +1,6 @@
-"""Aggregate the step-level loss log into the per-epoch CSV the assignment asks for.
-
-finetune.py logs every optimizer step, which is more useful for plotting and
-for spotting instability. The submission wants columns `epoch, train_loss`,
-so this collapses the former into the latter rather than having the training
-loop write two files.
-
-    python scripts/epoch_losses.py --in logs/runA_loss.csv --out logs/runA_epoch_loss.csv
+"""Collapses the per-step loss log into the per-epoch CSV the submission asks for.
+I have kept the step-level log as well, since it is more useful for plotting the
+loss curve and for spotting instability during training.
 """
 
 import argparse
@@ -37,7 +32,6 @@ def main():
         writer.writerow(["epoch", "train_loss"])
         for epoch in sorted(losses):
             mean = sum(losses[epoch]) / len(losses[epoch])
-            # 1-indexed: the training loop counts from 0, the report counts epochs.
             writer.writerow([epoch + 1, f"{mean:.6f}"])
 
     print(f"{args.source.name} -> {args.target.name}")
@@ -45,7 +39,6 @@ def main():
         values = losses[epoch]
         print(f"  epoch {epoch + 1}: {sum(values) / len(values):.6f} "
               f"over {len(values)} steps")
-
 
 if __name__ == "__main__":
     main()

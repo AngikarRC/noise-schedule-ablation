@@ -1,16 +1,6 @@
-"""Score Run 0, Run A and Run B against the held-out infrared ground truth.
-
-Primary metric is SSIM, as declared. The task produces a near-greyscale
-thermal image whose value lies in preserved structure rather than exact pixel
-agreement, and LPIPS is trained on natural RGB photographs so it carries
-little meaning on infrared output.
-
-Luminance mean and standard deviation are reported alongside. The hypothesis
-is that the powered schedule shifts the log-SNR curve down, giving the model
-proportionally more training in the low-SNR regime where global brightness and
-contrast are decided - so if the mechanism is real it should show up here,
-in how well each run reproduces the overall thermal level, before it shows up
-in SSIM.
+"""Scores Run 0, Run A and Run B against the held-out infrared images.
+I have added luminance error and contrast ratio alongside SSIM because the
+hypothesis is about global brightness accuracy, which SSIM is too local to show.
 """
 
 import argparse
@@ -121,7 +111,6 @@ def main():
     table.to_csv(out / "metrics.csv")
     (out / "metrics.json").write_text(json.dumps(results, indent=2))
     print(f"\nwrote {out / 'metrics.csv'}")
-
 
 if __name__ == "__main__":
     main()

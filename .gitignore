@@ -1,29 +1,17 @@
-# Dataset. LLVIP is ~15,000 image pairs and is not ours to redistribute.
-# Fetch it from https://bupt-ai-cz.github.io/LLVIP/ and run prepare_llvip.py;
-# the manifests under data/ pin exactly which pairs were used.
+# The dataset. LLVIP is not ours to redistribute and its licence covers
+# non-commercial research use only. data/cache holds resized copies of it and
+# rebuilds in a few minutes from the tracked manifests, so neither is tracked.
 LLVIP/
 data/cache/
 
-# Run products: generated images, checkpoints, trajectories, metrics.
-# All reproducible from the commands in the README.
-outputs/
-trajectories/
-report/figures/
-report/metrics.*
-report/per_image_*.csv
-report/code_diff.txt
-logs/*_loss.csv
+# Intermediate LoRA adapters, five per run at 12.8 MB each. The images they
+# produced are tracked under outputs/run*/ckpt-*, and the final adapter for
+# each run sits at outputs/runA/ and outputs/runB/, so these add 128 MB
+# without adding anything a reader needs.
+outputs/*/checkpoint-*/
 
-# Tracked on purpose, despite sitting in generated directories:
-#   data/*.txt            the split - without it the runs are not reproducible
-#   data/split_summary.json
-#   schedules/            the alpha_bar arrays and checksums for both runs,
-#                         which are the evidence that Run B used the powered
-#                         schedule and Run A did not
-#   logs/env.json         the machine and library versions results came from
-#
-# For the report submission, force-add the figures you need:
-#   git add -f report/figures/fig1_schedule.png
+# Generated during a run but reproducible, and large enough not to be worth it.
+report/code_diff.txt
 
 .venv/
 venv/
@@ -32,3 +20,17 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 Thumbs.db
+
+# Tracked on purpose, listed here so nobody adds them to the ignore list later:
+#   data/*.txt                 the split; without it the runs cannot be reproduced
+#   schedules/                 the alpha_bar arrays and both checksums, which are
+#                              the evidence that Run B used the modified schedule
+#   logs/                      env.json and the loss CSVs
+#   outputs/run0/              Run 0 baseline images
+#   outputs/run*/final/        final test-set images
+#   outputs/run*/ckpt-*/       samples at each epoch boundary
+#   outputs/run*/schedule/     what each run actually trained with
+#   outputs/run*/pytorch_lora_weights.safetensors    the final adapter
+#   trajectories/              the x_t captures
+#   report/figures/            the plots and comparison grids
+#   report/metrics.csv         the scores table

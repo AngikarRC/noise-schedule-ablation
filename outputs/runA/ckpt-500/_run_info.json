@@ -1,0 +1,14 @@
+{
+  "run_mode": "A",
+  "schedule_mode": "A",
+  "schedule_checksum": "40873f7067e7f82d",
+  "exponent": 1.0,
+  "lora": "outputs/runA/checkpoint-500",
+  "manifest": "val_fixed.txt",
+  "seed": 20261026,
+  "steps": 50,
+  "image_guidance_scale": 1.5,
+  "guidance_scale": 7.5,
+  "count": 4,
+  "prompt": "turn this visible-light photo into an infrared thermal image"
+}

@@ -1,0 +1,121 @@
+{
+  "run_mode": "B",
+  "schedule_checksum": "6fa947b412c6432e",
+  "exponent": 2.35,
+  "num_inference_steps": 50,
+  "capture_steps": [
+    0,
+    12,
+    24,
+    37,
+    49
+  ],
+  "seed": 20261026,
+  "images": [
+    {
+      "run": "B",
+      "sample": "190001.jpg",
+      "sampler_step": 0,
+      "timestep": 999,
+      "file": "runB_190001_step00_t0999.png"
+    },
+    {
+      "run": "B",
+      "sample": "190001.jpg",
+      "sampler_step": 12,
+      "timestep": 754,
+      "file": "runB_190001_step12_t0754.png"
+    },
+    {
+      "run": "B",
+      "sample": "190001.jpg",
+      "sampler_step": 24,
+      "timestep": 509,
+      "file": "runB_190001_step24_t0509.png"
+    },
+    {
+      "run": "B",
+      "sample": "190001.jpg",
+      "sampler_step": 37,
+      "timestep": 244,
+      "file": "runB_190001_step37_t0244.png"
+    },
+    {
+      "run": "B",
+      "sample": "190001.jpg",
+      "sampler_step": 49,
+      "timestep": 0,
+      "file": "runB_190001_step49_t0000.png"
+    },
+    {
+      "run": "B",
+      "sample": "190034.jpg",
+      "sampler_step": 0,
+      "timestep": 999,
+      "file": "runB_190034_step00_t0999.png"
+    },
+    {
+      "run": "B",
+      "sample": "190034.jpg",
+      "sampler_step": 12,
+      "timestep": 754,
+      "file": "runB_190034_step12_t0754.png"
+    },
+    {
+      "run": "B",
+      "sample": "190034.jpg",
+      "sampler_step": 24,
+      "timestep": 509,
+      "file": "runB_190034_step24_t0509.png"
+    },
+    {
+      "run": "B",
+      "sample": "190034.jpg",
+      "sampler_step": 37,
+      "timestep": 244,
+      "file": "runB_190034_step37_t0244.png"
+    },
+    {
+      "run": "B",
+      "sample": "190034.jpg",
+      "sampler_step": 49,
+      "timestep": 0,
+      "file": "runB_190034_step49_t0000.png"
+    },
+    {
+      "run": "B",
+      "sample": "190067.jpg",
+      "sampler_step": 0,
+      "timestep": 999,
+      "file": "runB_190067_step00_t0999.png"
+    },
+    {
+      "run": "B",
+      "sample": "190067.jpg",
+      "sampler_step": 12,
+      "timestep": 754,
+      "file": "runB_190067_step12_t0754.png"
+    },
+    {
+      "run": "B",
+      "sample": "190067.jpg",
+      "sampler_step": 24,
+      "timestep": 509,
+      "file": "runB_190067_step24_t0509.png"
+    },
+    {
+      "run": "B",
+      "sample": "190067.jpg",
+      "sampler_step": 37,
+      "timestep": 244,
+      "file": "runB_190067_step37_t0244.png"
+    },
+    {
+      "run": "B",
+      "sample": "190067.jpg",
+      "sampler_step": 49,
+      "timestep": 0,
+      "file": "runB_190067_step49_t0000.png"
+    }
+  ]
+}

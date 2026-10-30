@@ -1,7 +1,6 @@
-"""Verify the training environment and measure step time.
-
-Run this before anything else. If the GPU section fails, nothing downstream
-will work, and the fix is a CUDA 12.8+ torch build.
+"""Checks the GPU and times a LoRA training step before anything expensive starts.
+I have included the batch and resolution sweep because the 5050 is Blackwell and
+a torch build without sm_120 kernels installs fine and then fails on first use.
 """
 
 import argparse
@@ -83,7 +82,6 @@ def check_gpu(torch, info):
               "https://download.pytorch.org/whl/cu128")
         return False
 
-    # A matmul is the real test; arch lists can lie about what actually runs.
     try:
         a = torch.randn(2048, 2048, device="cuda", dtype=torch.float16)
         b = a @ a
@@ -102,11 +100,6 @@ def check_gpu(torch, info):
 
 
 def time_batch(torch, unet, batch_size, steps, lora_params, latent_size):
-    """One timed micro-batch loop, optimizer step included.
-
-    The optimizer step has to be in the loop. Without it Adam never allocates
-    its moment buffers and the peak-memory figure is meaningless.
-    """
     latents = torch.randn(batch_size, 8, latent_size, latent_size,
                           device="cuda", dtype=torch.float16)
     encoder_states = torch.randn(batch_size, 77, 768, device="cuda", dtype=torch.float16)
@@ -138,7 +131,6 @@ def time_batch(torch, unet, batch_size, steps, lora_params, latent_size):
 
 
 def benchmark(torch, info, steps, resolutions):
-    """Time the LoRA training step across resolutions and batch sizes."""
     print()
     print("=" * 60)
     print(f"STEP TIME ({steps} micro-batches each)")
@@ -231,7 +223,6 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(info, indent=2))
     print(f"\nwrote {args.out}")
-
 
 if __name__ == "__main__":
     main()

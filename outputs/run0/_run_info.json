@@ -1,0 +1,14 @@
+{
+  "run_mode": "0",
+  "schedule_mode": "A",
+  "schedule_checksum": "40873f7067e7f82d",
+  "exponent": 1.0,
+  "lora": null,
+  "manifest": "test.txt",
+  "seed": 20261026,
+  "steps": 50,
+  "image_guidance_scale": 1.5,
+  "guidance_scale": 7.5,
+  "count": 100,
+  "prompt": "turn this visible-light photo into an infrared thermal image"
+}

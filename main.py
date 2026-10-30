@@ -1,14 +1,7 @@
-"""Run the noise schedule ablation end to end.
-
-    python main.py                  everything, skipping finished stages
-    python main.py --dry-run        print the commands, run nothing
-    python main.py --from train-a   resume from a stage
-    python main.py --only eval      one stage
-    python main.py --force          redo stages that already have output
-
-Every command is printed before it runs, so this doubles as the record of
-exactly what produced the results. The underlying scripts stay independently
-runnable - nothing here is required to reproduce a single stage by hand.
+"""Runs the whole experiment in order and prints every command before it runs,
+so the terminal log doubles as the record of what produced the results.
+I have kept each stage runnable on its own, so this file is a convenience
+rather than something the pipeline depends on.
 """
 
 import argparse
@@ -23,11 +16,6 @@ PY = sys.executable
 SEED = "20261026"
 RESOLUTION = "512"
 
-# 2000 training pairs at effective batch 4 is 500 optimizer steps per epoch,
-# so 2500 steps is exactly 5 epochs and a checkpoint every 500 steps falls on
-# an epoch boundary. The assignment asks for samples at 5 equally spaced
-# fine-tuning epochs, so the checkpoints have to line up with epochs rather
-# than being five arbitrary points in training.
 TRAIN_PAIRS = 2000
 EFFECTIVE_BATCH = 4
 STEPS_PER_EPOCH = TRAIN_PAIRS // EFFECTIVE_BATCH
@@ -42,7 +30,6 @@ EXPECTED_CHECKSUMS = {"A": "40873f7067e7f82d", "B": "6fa947b412c6432e"}
 
 
 def train_command(run_mode):
-    """Run A and Run B differ here and nowhere else."""
     return [
         PY, "scripts/finetune.py",
         "--run_mode", run_mode,
@@ -152,11 +139,6 @@ def build_stages():
 
 
 def assert_single_variable():
-    """The ablation is only valid if A and B differ in the intended places.
-
-    Cheap to check and easy to break - someone adds a flag to one command
-    and the comparison is quietly no longer single-variable.
-    """
     a, b = train_command("A"), train_command("B")
     if len(a) != len(b):
         raise SystemExit("Run A and Run B commands have different lengths")
@@ -199,7 +181,6 @@ def check_prerequisites(stage_names):
 
 
 def verify_checksums():
-    """Both runs must have used the schedule schedule.py recorded."""
     import json
 
     print("\nSchedule checksums actually used")
@@ -308,7 +289,6 @@ def main():
     print("\nNext: check outputs/runA/ckpt-2000 by eye before trusting "
           "report/metrics.csv.")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
