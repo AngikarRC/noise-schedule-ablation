@@ -1,7 +1,6 @@
-"""Implements the power transform on the noise schedule and proves it is correct.
-I have declared theta as alpha_bar because that is the quantity training actually
-reads, and because raising it to a power is the same as raising every per-step
-alpha, which makes it a reparameterisation rather than an arbitrary edit.
+"""Build and verify the native and powered alpha_bar schedules.
+
+Checks their bounds, records checksums, and saves a log-SNR comparison figure.
 """
 
 import argparse
@@ -174,10 +173,11 @@ def plot_comparison(sched_a, sched_b, out_path):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default=MODEL_ID)
-    ap.add_argument("--out-dir", type=Path, default=Path("schedules"))
-    ap.add_argument("--figure", type=Path, default=Path("report/figures/fig1_schedule.png"))
+    ap = argparse.ArgumentParser(description="Compare and export both noise schedules.")
+    ap.add_argument("--model", default=MODEL_ID, help="Pretrained model ID or path.")
+    ap.add_argument("--out-dir", type=Path, default=Path("schedules"), help="Schedule output folder.")
+    ap.add_argument("--figure", type=Path, default=Path("report/figures/fig1_schedule.png"),
+                    help="Log-SNR figure path.")
     args = ap.parse_args()
 
     print(f"exponent x = {POWER_EXPONENT}\n")

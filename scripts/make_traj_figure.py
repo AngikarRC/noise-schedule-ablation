@@ -1,4 +1,4 @@
-"""Builds the trajectory figure for the report from trajectories/run*/."""
+"""Create the report figure from saved inference trajectories."""
 
 import json
 from pathlib import Path

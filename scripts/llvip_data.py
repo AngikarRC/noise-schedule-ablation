@@ -1,7 +1,7 @@
-"""Feeds LLVIP image pairs to the training loop.
-I have mapped the visible image onto original_pixel_values and the infrared image
-onto edited_pixel_values, which are InstructPix2Pix's names for the conditioning
-image and the target. Augmentation is off so both runs see identical data.
+"""Load cached LLVIP image pairs for InstructPix2Pix training.
+
+Visible images are conditioning inputs and infrared images are targets. Shared
+preprocessing keeps the inputs aligned across both runs.
 """
 
 from pathlib import Path

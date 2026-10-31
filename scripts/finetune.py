@@ -2,8 +2,9 @@
 # ---------------------------------------------------------------------------
 # Generated from huggingface/diffusers v0.31.0, example
 #   examples/instruct_pix2pix/train_instruct_pix2pix.py
-# The untouched original is in baseline/. I have marked my changes # ADDED and
-# # MODIFIED. Regenerate with: python scripts/make_finetune.py
+# Source copy: baseline/train_instruct_pix2pix_ORIGINAL.py
+# Project changes are marked ADDED or MODIFIED. Regenerate with:
+#   python scripts/make_finetune.py
 # ---------------------------------------------------------------------------
 # coding=utf-8
 # Copyright 2024 The HuggingFace Inc. team. All rights reserved.
@@ -20,7 +21,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Script to fine-tune Stable Diffusion for InstructPix2Pix."""
+"""Fine-tune InstructPix2Pix on LLVIP with LoRA and the selected noise schedule."""
 
 import argparse
 from pathlib import Path  # ADDED
@@ -33,7 +34,7 @@ from contextlib import nullcontext
 from pathlib import Path
 
 import accelerate
-# MODIFIED - datasets import removed; see the note below
+# MODIFIED - LLVIP is loaded from local files; datasets is not required.
 import numpy as np
 import PIL
 import requests
@@ -45,8 +46,7 @@ import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import ProjectConfiguration, set_seed
-# MODIFIED - I load LLVIP from files, so the datasets library is unused and its
-# pyarrow dependency conflicts with the pinned numpy.
+# MODIFIED - Use the local LLVIP loader to avoid the datasets pyarrow dependency.
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # ADDED
 from schedule import (  # ADDED
@@ -129,7 +129,7 @@ def log_validation(
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Simple example of a training script for InstructPix2Pix.")
+    parser = argparse.ArgumentParser(description="Fine-tune InstructPix2Pix with LoRA.")
     parser.add_argument(
         "--pretrained_model_name_or_path",
         type=str,
@@ -155,26 +155,26 @@ def parse_args():
         type=str,  # ADDED
         required=True,  # ADDED
         choices=["A", "B"],  # ADDED
-        help="A = native schedule, B = alpha_bar ** POWER_EXPONENT",  # ADDED
+        help="A = native; B = powered schedule",  # ADDED
     )  # ADDED
     parser.add_argument(  # ADDED
         "--llvip_data",  # ADDED
         type=str,  # ADDED
         default="data",  # ADDED
-        help="directory holding train.txt / val.txt / test.txt and cache/",  # ADDED
+        help="Prepared LLVIP data folder.",  # ADDED
     )  # ADDED
-    parser.add_argument("--lora_rank", type=int, default=16)  # ADDED
-    parser.add_argument("--lora_alpha", type=int, default=16)  # ADDED
+    parser.add_argument("--lora_rank", type=int, default=16, help="LoRA rank.")  # ADDED
+    parser.add_argument("--lora_alpha", type=int, default=16, help="LoRA alpha.")  # ADDED
     parser.add_argument(  # ADDED
         "--save_full_state",  # ADDED
         action="store_true",  # ADDED
-        help="also write the resumable accelerator checkpoint (~3.3 GB each)",  # ADDED
+        help="Save a resumable training checkpoint.",  # ADDED
     )  # ADDED
     parser.add_argument(  # ADDED
         "--loss_csv",  # ADDED
         type=str,  # ADDED
         default=None,  # ADDED
-        help="where to append epoch,train_loss rows",  # ADDED
+        help="Per-step loss CSV path.",  # ADDED
     )  # ADDED
     parser.add_argument(  # ADDED
         "--dataset_name",
@@ -265,8 +265,8 @@ def parse_args():
         default=None,
         help="The directory where the downloaded models and datasets will be stored.",
     )
-    parser.add_argument(  # MODIFIED - was default=None; the ablation is
-        "--seed", type=int, required=True,  # only meaningful if both runs share a seed
+    parser.add_argument(  # MODIFIED - require the same seed for both runs
+        "--seed", type=int, required=True,  # to compare schedules fairly
         help="A seed for reproducible training.",
     )
     parser.add_argument(
@@ -449,8 +449,7 @@ def parse_args():
     if env_local_rank != -1 and env_local_rank != args.local_rank:
         args.local_rank = env_local_rank
 
-    # MODIFIED - the dataset_name/train_data_dir check is obsolete here;
-    # training data comes from --llvip_data. Checked for real instead.
+    # MODIFIED - Check the LLVIP manifest instead of upstream dataset args.
     if not (Path(args.llvip_data) / 'train.txt').exists():  # ADDED
         raise ValueError(  # ADDED
             f"{args.llvip_data}/train.txt not found - run prepare_llvip.py first"  # ADDED
@@ -515,11 +514,11 @@ def main():
     )
     logger.info(accelerator.state, main_process_only=False)
     if accelerator.is_local_main_process:
-        # MODIFIED - datasets.utils.logging line removed with the import
+        # MODIFIED - Remove unused datasets logging.
         transformers.utils.logging.set_verbosity_warning()
         diffusers.utils.logging.set_verbosity_info()
     else:
-        # MODIFIED - datasets.utils.logging line removed with the import
+        # MODIFIED - Remove unused datasets logging.
         transformers.utils.logging.set_verbosity_error()
         diffusers.utils.logging.set_verbosity_error()
 
@@ -563,8 +562,7 @@ def main():
     # then fine-tuned on the custom InstructPix2Pix dataset. This modified UNet is initialized
     # from the pre-trained checkpoints. For the extra channels added to the first layer, they are
     # initialized to zero.
-    # MODIFIED - the widening below assumes a plain Stable Diffusion UNet.
-    # instruct-pix2pix already has 8 input channels, so I skip it.
+    # MODIFIED - InstructPix2Pix already has eight input channels; skip expansion.
     if unet.conv_in.in_channels == 8:  # ADDED
         logger.info("UNet already has 8 input channels; keeping conv_in as is.")  # ADDED
     else:  # ADDED
@@ -646,8 +644,8 @@ def main():
     if args.gradient_checkpointing:
         unet.enable_gradient_checkpointing()
 
-    # ADDED - full fine-tuning of the 0.9B UNet does not fit in 8 GB. I have kept
-    # this config identical across Run A and Run B so only the schedule differs.
+    # ADDED - Full fine-tuning exceeds 8 GB of VRAM. Keep LoRA settings the same
+    # across both runs so the noise schedule is the only training difference.
     from peft import LoraConfig  # ADDED
 
     unet.requires_grad_(False)  # ADDED
@@ -698,8 +696,7 @@ def main():
     # Get the datasets: you can either provide your own training and evaluation files (see below)
     # or specify a Dataset from the hub (the dataset will be downloaded automatically from the datasets Hub).
 
-    # MODIFIED - I have replaced the whole HF-dataset block with the LLVIP file
-    # loader, reading from the cache prepare_llvip.py builds.
+    # MODIFIED - Load LLVIP pairs from the manifests and cache built by prepare_llvip.py.
     train_dataset = LLVIPPairs(  # ADDED
         data_root=args.llvip_data,  # ADDED
         manifest="train.txt",  # ADDED
@@ -938,9 +935,8 @@ def main():
                                     shutil.rmtree(removing_checkpoint)
 
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
-                        # MODIFIED - save_state writes 3.3 GB per checkpoint and
-                        # nothing load_lora_weights can read, so I save only the
-                        # adapter. Pass --save_full_state for resumable training.
+                        # MODIFIED - Save adapter weights for inference. Use
+                        # --save_full_state only when a resumable state is needed.
                         from peft.utils import get_peft_model_state_dict  # ADDED
 
                         if args.save_full_state:  # ADDED
@@ -999,8 +995,7 @@ def main():
         if args.use_ema:
             ema_unet.copy_to(unet.parameters())
 
-        # MODIFIED - save_pretrained wrote the whole ~5 GB pipeline per run. Only
-        # the adapter differs between runs, so I save that instead.
+        # MODIFIED - Save the fine-tuned adapter; the pretrained pipeline is shared.
         from peft.utils import get_peft_model_state_dict  # ADDED
 
         StableDiffusionInstructPix2PixPipeline.save_lora_weights(  # ADDED

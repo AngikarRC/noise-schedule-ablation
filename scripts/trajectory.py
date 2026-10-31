@@ -1,6 +1,6 @@
-"""Saves the noisy sample x_t at five points of the reverse diffusion process.
-I have decoded each capture through the VAE before writing it, since x_t is a
-latent and would otherwise be four meaningless noise channels rather than a picture.
+"""Capture decoded samples at selected steps of reverse diffusion.
+
+The saved images show how Runs A and B denoise the same inputs over time.
 """
 
 import argparse
@@ -18,10 +18,8 @@ from schedule import POWER_EXPONENT, schedule_checksum
 
 
 def decode(pipe, latents):
-    # At the first timestep Run B's x_t is a few hundred times larger than
-    # anything the VAE was trained on, which overflows it and writes a black
-    # frame, so I divide by its own spread before decoding and record that
-    # divisor next to the image.
+    # Early Run B latents can exceed the VAE's training range. Normalize by
+    # their spread before decoding and record the scale with the image.
     z = torch.nan_to_num(latents.float(), nan=0.0, posinf=0.0, neginf=0.0)
     scale = float(z.std().item())
     if scale > 1.5:
@@ -42,18 +40,18 @@ def decode(pipe, latents):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--run_mode", required=True, choices=["A", "B"])
-    ap.add_argument("--lora", required=True)
-    ap.add_argument("--data", default="data")
-    ap.add_argument("--manifest", default="test.txt")
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--seed", type=int, required=True)
-    ap.add_argument("--steps", type=int, default=50)
-    ap.add_argument("--samples", type=int, default=3)
-    ap.add_argument("--captures", type=int, default=5)
-    ap.add_argument("--image_guidance_scale", type=float, default=1.5)
-    ap.add_argument("--guidance_scale", type=float, default=7.5)
+    ap = argparse.ArgumentParser(description="Save decoded samples along the reverse process.")
+    ap.add_argument("--run_mode", required=True, choices=["A", "B"], help="Run A or B.")
+    ap.add_argument("--lora", required=True, help="LoRA checkpoint path.")
+    ap.add_argument("--data", default="data", help="Prepared data folder.")
+    ap.add_argument("--manifest", default="test.txt", help="Split manifest filename.")
+    ap.add_argument("--out", required=True, help="Trajectory output folder.")
+    ap.add_argument("--seed", type=int, required=True, help="Random seed.")
+    ap.add_argument("--steps", type=int, default=50, help="Inference steps.")
+    ap.add_argument("--samples", type=int, default=3, help="Number of samples.")
+    ap.add_argument("--captures", type=int, default=5, help="Capture points per sample.")
+    ap.add_argument("--image_guidance_scale", type=float, default=1.5, help="Image guidance scale.")
+    ap.add_argument("--guidance_scale", type=float, default=7.5, help="Text guidance scale.")
     args = ap.parse_args()
 
     pipe = build_pipeline(args.run_mode, args.lora)

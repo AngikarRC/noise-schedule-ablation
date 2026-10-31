@@ -1,6 +1,6 @@
-"""Writes the unified diff between the untouched baseline and our generated
-training script. This is a script rather than a shell command because on
-PowerShell `diff` is an alias for Compare-Object and rejects the usual flags.
+"""Write a unified diff between the original and generated training scripts.
+
+Using Python avoids PowerShell's `diff` alias for `Compare-Object`.
 """
 
 import argparse
@@ -13,10 +13,10 @@ OUT = "report/code_diff.txt"
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--baseline", default=BASELINE)
-    ap.add_argument("--generated", default=GENERATED)
-    ap.add_argument("--out", default=OUT)
+    ap = argparse.ArgumentParser(description="Write a unified diff of the training scripts.")
+    ap.add_argument("--baseline", default=BASELINE, help="Original training script path.")
+    ap.add_argument("--generated", default=GENERATED, help="Generated training script path.")
+    ap.add_argument("--out", default=OUT, help="Diff output path.")
     args = ap.parse_args()
 
     base = Path(args.baseline)
