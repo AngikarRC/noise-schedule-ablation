@@ -33,7 +33,14 @@ Three packages are deliberately left out. The datasets library pulls in pyarrow,
 
 ## Running the experiment
 
-Download LLVIP and unpack it so that LLVIP/visible/train and LLVIP/infrared/train exist, then run:
+Download LLVIP from LLVIP dataset can be downloaded through the following links:
+
+Google Drive: https://drive.google.com/file/d/1VTlT3Y7e1h-Zsne4zahjx5q0TK2ClMVv/view?usp=sharing
+
+Baidu Yun: https://pan.baidu.com/s/1eQO1Is2NPyd-mgmv1Csbfg Password: 14lc
+
+
+Post download , unpack it and keep at project root so that LLVIP/visible/train and LLVIP/infrared/train exist, then run:
 
     python main.py
 
