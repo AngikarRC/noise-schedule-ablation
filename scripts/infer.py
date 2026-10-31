@@ -1,7 +1,6 @@
-"""Generates images for Run 0, Run A and Run B.
-I have made run_mode drive both the weights and the sampler's schedule, because
-sampling a model under a different schedule than it trained on produces garbage
-that looks exactly like the modified schedule being at fault.
+"""Generate LLVIP infrared predictions with Run 0, Run A, or Run B.
+
+Each run uses the same noise schedule for inference that it used during training.
 """
 
 import argparse
@@ -52,17 +51,18 @@ def read_manifest(data_root, manifest):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--run_mode", required=True, choices=["0", "A", "B"])
-    ap.add_argument("--lora", default=None, help="path to LoRA weights; omit for Run 0")
-    ap.add_argument("--data", default="data")
-    ap.add_argument("--manifest", default="test.txt")
-    ap.add_argument("--out", required=True)
-    ap.add_argument("--seed", type=int, required=True)
-    ap.add_argument("--steps", type=int, default=50)
-    ap.add_argument("--image_guidance_scale", type=float, default=1.5)
-    ap.add_argument("--guidance_scale", type=float, default=7.5)
-    ap.add_argument("--limit", type=int, default=None)
+    ap = argparse.ArgumentParser(description="Generate LLVIP predictions with a selected run.")
+    ap.add_argument("--run_mode", required=True, choices=["0", "A", "B"],
+                    help="Run 0, A, or B.")
+    ap.add_argument("--lora", default=None, help="LoRA weights (omit for Run 0).")
+    ap.add_argument("--data", default="data", help="Prepared data folder.")
+    ap.add_argument("--manifest", default="test.txt", help="Split manifest filename.")
+    ap.add_argument("--out", required=True, help="Prediction output folder.")
+    ap.add_argument("--seed", type=int, required=True, help="Random seed.")
+    ap.add_argument("--steps", type=int, default=50, help="Inference steps.")
+    ap.add_argument("--image_guidance_scale", type=float, default=1.5, help="Image guidance scale.")
+    ap.add_argument("--guidance_scale", type=float, default=7.5, help="Text guidance scale.")
+    ap.add_argument("--limit", type=int, default=None, help="Maximum images to process.")
     args = ap.parse_args()
 
     if args.run_mode == "0" and args.lora:

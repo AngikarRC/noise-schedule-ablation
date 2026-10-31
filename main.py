@@ -1,7 +1,6 @@
-"""Runs the whole experiment in order and prints every command before it runs,
-so the terminal log doubles as the record of what produced the results.
-I have kept each stage runnable on its own, so this file is a convenience
-rather than something the pipeline depends on.
+"""Run experiment stages in order and print each command before execution.
+
+Supports dry runs and stage-level resume; each stage can also run on its own.
 """
 
 import argparse

@@ -1,6 +1,6 @@
-"""Collapses the per-step loss log into the per-epoch CSV the submission asks for.
-I have kept the step-level log as well, since it is more useful for plotting the
-loss curve and for spotting instability during training.
+"""Average per-step training losses into one value per epoch.
+
+The source log remains available for plotting and checking training stability.
 """
 
 import argparse
@@ -10,9 +10,9 @@ from pathlib import Path
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--in", dest="source", type=Path, required=True)
-    ap.add_argument("--out", dest="target", type=Path, required=True)
+    ap = argparse.ArgumentParser(description="Convert step losses to per-epoch averages.")
+    ap.add_argument("--in", dest="source", type=Path, required=True, help="Per-step loss CSV.")
+    ap.add_argument("--out", dest="target", type=Path, required=True, help="Per-epoch output CSV.")
     args = ap.parse_args()
 
     if not args.source.exists():

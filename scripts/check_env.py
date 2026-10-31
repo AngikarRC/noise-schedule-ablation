@@ -1,6 +1,6 @@
-"""Checks the GPU and times a LoRA training step before anything expensive starts.
-I have included the batch and resolution sweep because the 5050 is Blackwell and
-a torch build without sm_120 kernels installs fine and then fails on first use.
+"""Check GPU support and benchmark a representative LoRA training step.
+
+This catches incompatible PyTorch/CUDA builds before the full training run.
 """
 
 import argparse
@@ -203,11 +203,12 @@ def benchmark(torch, info, steps, resolutions):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--steps", type=int, default=20)
-    ap.add_argument("--resolutions", type=int, nargs="+", default=[256, 512])
-    ap.add_argument("--skip-benchmark", action="store_true")
-    ap.add_argument("--out", type=Path, default=Path("logs/env.json"))
+    ap = argparse.ArgumentParser(description="Check the GPU setup and benchmark training.")
+    ap.add_argument("--steps", type=int, default=20, help="Benchmark steps per resolution.")
+    ap.add_argument("--resolutions", type=int, nargs="+", default=[256, 512],
+                    help="Image sizes to benchmark.")
+    ap.add_argument("--skip-benchmark", action="store_true", help="Skip the training benchmark.")
+    ap.add_argument("--out", type=Path, default=Path("logs/env.json"), help="Report file path.")
     args = ap.parse_args()
 
     torch, info = report_versions()

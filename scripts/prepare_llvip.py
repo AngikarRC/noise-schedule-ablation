@@ -1,7 +1,6 @@
-"""Builds the train/val/test splits and a 512px cache from the raw LLVIP folders.
-I have split on scene boundaries rather than randomly, because LLVIP images are
-video frames and two frames from one scene are far more alike than two frames
-from different scenes, which would leak near-duplicates into the test set.
+"""Create scene-disjoint LLVIP splits and a resized image cache.
+
+Splitting by capture session keeps near-duplicate frames out of different splits.
 """
 
 import argparse
@@ -124,17 +123,18 @@ def write_manifest(path, records):
 
 
 def main():
-    ap = argparse.ArgumentParser()
+    ap = argparse.ArgumentParser(description="Create LLVIP splits and the image cache.")
     ap.add_argument("--llvip", type=Path, required=True,
-                    help="path to the LLVIP folder containing visible/ and infrared/")
-    ap.add_argument("--out", type=Path, default=Path("data"))
-    ap.add_argument("--resolution", type=int, default=512)
-    ap.add_argument("--train-size", type=int, default=2000)
-    ap.add_argument("--val-size", type=int, default=60)
-    ap.add_argument("--test-size", type=int, default=100)
+                    help="LLVIP folder with visible/ and infrared/.")
+    ap.add_argument("--out", type=Path, default=Path("data"), help="Output data folder.")
+    ap.add_argument("--resolution", type=int, default=512, help="Cache image size.")
+    ap.add_argument("--train-size", type=int, default=2000, help="Number of training pairs.")
+    ap.add_argument("--val-size", type=int, default=60, help="Number of validation pairs.")
+    ap.add_argument("--test-size", type=int, default=100, help="Number of test pairs.")
     ap.add_argument("--fixed-batch", type=int, default=4,
-                    help="validation images generated at every checkpoint")
-    ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 4) - 1))
+                    help="Fixed validation images per checkpoint.")
+    ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 4) - 1),
+                    help="Image processing workers.")
     args = ap.parse_args()
 
     random.seed(SEED)

@@ -1,6 +1,6 @@
-"""Scores Run 0, Run A and Run B against the held-out infrared images.
-I have added luminance error and contrast ratio alongside SSIM because the
-hypothesis is about global brightness accuracy, which SSIM is too local to show.
+"""Compare Run 0, Run A, and Run B predictions with held-out infrared images.
+
+Reports SSIM, PSNR, luminance error, and contrast ratio.
 """
 
 import argparse
@@ -64,13 +64,13 @@ def score_run(pred_dir, data_root, manifest):
 
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--data", default="data")
-    ap.add_argument("--manifest", default="test.txt")
-    ap.add_argument("--run0", default="outputs/run0")
-    ap.add_argument("--runA", default="outputs/runA/final")
-    ap.add_argument("--runB", default="outputs/runB/final")
-    ap.add_argument("--out", default="report")
+    ap = argparse.ArgumentParser(description="Evaluate the baseline and both fine-tuned runs.")
+    ap.add_argument("--data", default="data", help="Prepared data folder.")
+    ap.add_argument("--manifest", default="test.txt", help="Test manifest filename.")
+    ap.add_argument("--run0", default="outputs/run0", help="Run 0 predictions folder.")
+    ap.add_argument("--runA", default="outputs/runA/final", help="Run A predictions folder.")
+    ap.add_argument("--runB", default="outputs/runB/final", help="Run B predictions folder.")
+    ap.add_argument("--out", default="report", help="Report output folder.")
     args = ap.parse_args()
 
     out = Path(args.out)
